@@ -131,7 +131,7 @@ function ver(){
 }
 function confirmar(){servidor({accion:'confirmar'},function(d){cita=d.cita;final('🟢','¡Gracias, '+esc(cita.clienta)+'!','Te esperamos '+esc(cita.cuando.charAt(0).toLowerCase()+cita.cuando.slice(1))+'.');});}
 function preguntarCancelar(){
-  pintar(tarjeta()+'<p style="font-size:17px">¿Seguro que quieres cancelarla? Así otra clienta podrá usar tu hora.</p>'+
+  pintar(tarjeta()+'<p style="font-size:17px">¿Seguro que quieres cancelarla? Así otra persona podrá usar tu hora.</p>'+
     '<button class="ok" style="background:var(--rojo)" onclick="cancelar()">Sí, cancelar la cita</button>'+
     '<button class="ok" style="background:#fff;color:var(--tinta);border:2px solid var(--linea)" onclick="cambiarDia(\'\')">Mejor cambiarla de hora</button>'+
     '<button class="enlace" onclick="ver()">← No, la mantengo</button>');
