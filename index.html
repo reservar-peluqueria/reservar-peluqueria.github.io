@@ -194,7 +194,9 @@ function elegirHora(j){
     '<input class="campo" id="nombre" placeholder="Tu nombre" autocomplete="name" value="'+esc(guardado('res_nombre')||'')+'">'+
     '<input class="campo" id="tel" placeholder="Tu teléfono" inputmode="tel" autocomplete="tel" value="'+esc(guardado('res_tel')||'')+'">'+
     '<input class="campo" id="correo" placeholder="Tu correo (opcional, para el recordatorio)" inputmode="email" autocomplete="email" value="'+esc(guardado('res_correo')||'')+'">'+
-    '<button class="ok" id="btnReservar" onclick="reservar()">Reservar</button><button class="enlace" onclick="elegirDia(sel.dias.indexOf(sel.dia))">← Otra hora</button>');
+    '<button class="ok" id="btnReservar" onclick="reservar()">Reservar</button><button class="enlace" onclick="elegirDia(sel.dias.indexOf(sel.dia))">← Otra hora</button>'+
+    // Protección de datos (RGPD): quién guarda los datos y para qué.
+    '<p style="font-size:13px;color:#7A6D60;margin-top:14px">Tus datos los guarda '+esc(datos.negocio)+' solo para gestionar tus citas (confirmación, recordatorio y, si vienes, pedirte tu opinión). No se comparten con nadie. Para verlos, cambiarlos o borrarlos, pídeselo a la peluquería.</p>');
 }
 function reservar(){
   var nombre=document.getElementById('nombre').value.trim(), tel=document.getElementById('tel').value.trim(), correo=document.getElementById('correo').value.trim();
