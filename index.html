@@ -1,0 +1,240 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Reservar cita</title>
+<meta name="theme-color" content="#2E6B5F">
+<link rel="icon" href="icono-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reservar">
+<link rel="apple-touch-icon" href="icono-180.png">
+<style>
+  :root{--papel:#FFFDF8;--tinta:#2B241E;--gris:#7A6D60;--linea:#E7DDCD;--terracota:#B8522F;--claro:#F6E3DA;--verde:#188038;--verde-claro:#E6F4EA;--rojo:#C5221F;--rojo-claro:#FCE8E6}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--papel);color:var(--tinta);font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  /* Netlify pone abajo un aviso "Powered by Netlify" (plan gratis): se deja hueco
+     para que no tape los botones de abajo (pasó con "Cerrar la caja", 02/10). */
+  #app{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  button{font:inherit;color:inherit;cursor:pointer;border:0}
+  .cab{background:var(--terracota);color:#fff;padding:14px 16px}
+  .cab small{opacity:.85;display:block;font-size:12px}.cab b{font-size:19px}
+  .quien{float:right;background:rgba(255,255,255,.22);border-radius:20px;padding:6px 12px;font-size:14px;color:#fff}
+  .cuerpo{flex:1;padding:14px;overflow-y:auto}
+  .titulo{font-weight:700;font-size:18px;margin:4px 2px 12px}
+  .rejilla{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grande{background:#fff;border:2px solid var(--linea);border-radius:16px;padding:16px 8px;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+  .grande:active,.pago:active{transform:scale(.97)}
+  .grande .n{font-weight:700;font-size:16px}.grande .p{color:var(--terracota);font-weight:700;font-size:19px}
+  .pagos{display:grid;gap:12px}
+  .pago{background:#fff;border:2px solid var(--linea);border-radius:16px;padding:20px;font-size:22px;font-weight:700;display:flex;align-items:center;gap:14px}
+  .pago span{font-size:30px}
+  .elegido{background:var(--claro);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:17px}
+  .cambiar{background:#fff;border-radius:10px;padding:8px 10px;font-size:14px;margin-left:8px}
+  .enlace{background:none;color:var(--gris);text-decoration:underline;padding:12px;font-size:15px;display:block;margin:6px auto 0}
+  .pie{border-top:1px solid var(--linea);padding:10px 14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pie button{background:#F0E8DC;border-radius:12px;padding:14px 6px;font-size:15px;font-weight:700}
+  .lista{display:grid;gap:10px}
+  .lista button{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:18px;font-size:20px;font-weight:700}
+  .pantalla-num{font-size:40px;font-weight:700;text-align:center;margin:8px 0 16px;min-height:52px}
+  .teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .teclado button{background:#fff;border:2px solid var(--linea);border-radius:12px;padding:16px;font-size:24px;font-weight:700}
+  .ok{width:100%;margin-top:12px;background:var(--terracota);color:#fff;border-radius:14px;padding:18px;font-size:20px;font-weight:700}
+  .ok:disabled{opacity:.5}
+  .hecho{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;background:var(--verde-claro)}
+  .hecho .grande-emoji{font-size:64px}.hecho h2{margin:0;color:var(--verde);font-size:28px}.hecho p{margin:0;font-size:19px}
+  .hecho.mal{background:var(--rojo-claro)}.hecho.mal h2{color:var(--rojo)}
+  .deshacer{margin-top:18px;background:#fff;border:3px solid var(--rojo);color:var(--rojo);border-radius:16px;padding:16px 28px;font-size:21px;font-weight:700}
+  .cuenta{color:var(--gris);font-size:14px}
+  .aviso{background:var(--rojo-claro);color:var(--rojo);border-radius:12px;padding:12px;margin:10px 0;font-weight:700;text-align:center}
+  .cargando{opacity:.5;pointer-events:none}
+  .pie.tres{grid-template-columns:1fr 1fr 1fr}
+  .destacado{border-color:var(--terracota)!important;background:var(--claro)!important}
+  .buscador{width:100%;padding:12px 14px;font-size:16px;border:2px solid var(--linea);border-radius:12px;margin-bottom:10px;font-family:inherit}
+  .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+  .chip{background:#fff;border:2px solid var(--linea);border-radius:20px;padding:7px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+  .chip.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .lista-prod{display:grid;gap:8px}
+  .fila-prod{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%}
+  .fila-prod small{display:block;color:var(--gris);font-size:12px}.fila-prod b{font-size:16px}
+  .fila-prod .lado{text-align:right;white-space:nowrap}.pv{color:var(--terracota)}
+  .contador{display:flex;align-items:center;justify-content:center;gap:28px;margin:18px 0}
+  .contador button{width:64px;height:64px;border-radius:50%;border:2px solid var(--linea);background:#fff;font-size:30px;font-weight:700}
+  .contador b{font-size:44px;min-width:50px;text-align:center}
+  .aviso-stock{background:#FBEFD9;color:#A86B12;border-radius:10px;padding:10px 14px;font-weight:700;margin-top:6px}
+  .aviso-stock.rojo{background:var(--rojo-claro);color:var(--rojo)}
+  .dia-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+  .dia-nav button{background:#fff;border:2px solid var(--linea);border-radius:10px;padding:8px 14px;font-weight:700;font-size:18px}
+  .dia-nav b{font-size:16px;text-align:center}
+  .filtro{display:flex;gap:6px;margin-bottom:10px}
+  .filtro button{background:#fff;border:2px solid var(--linea);border-radius:20px;padding:7px 14px;font-weight:700;font-size:14px}
+  .filtro button.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .cita{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .cita .arriba{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .cita .h{font-size:20px;font-weight:700}.cita .h small{font-size:13px;color:var(--gris);font-weight:400}
+  .cita .cl{font-weight:700;font-size:16px;margin-top:2px}.cita .mas{color:var(--gris);font-size:14px}
+  .cita.hecha{opacity:.8}
+  .sello{font-size:12px;font-weight:700;border-radius:20px;padding:4px 9px;white-space:nowrap}
+  .s-conf{background:var(--verde-claro);color:var(--verde)}.s-pend{background:#FBEFD9;color:#A86B12}
+  .s-vino{background:var(--verde);color:#fff}.s-falta{background:var(--rojo);color:#fff}
+  .acciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .acciones button{border-radius:10px;padding:12px 6px;font-weight:700;font-size:15px}
+  .b-vino{background:var(--verde-claro);color:var(--verde);border:2px solid #B7DFC2}
+  .b-falta{background:var(--rojo-claro);color:var(--rojo);border:2px solid #F3C0BB}
+  .llamar{display:inline-block;margin-top:8px;color:#A86B12;font-weight:700;font-size:14px;text-decoration:none}
+  .vacio{text-align:center;color:var(--gris);padding:30px 10px}
+  .horas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .hora{background:#fff;border:2px solid var(--linea);border-radius:12px;padding:14px 4px;font-weight:700;font-size:17px}
+  .franja{color:var(--gris);font-weight:700;margin:14px 2px 8px;font-size:14px}
+  .campo{width:100%;padding:14px;font-size:17px;border:2px solid var(--linea);border-radius:12px;margin-bottom:10px;font-family:inherit}
+  .modulos{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
+  .modulos button{background:rgba(255,255,255,.18);color:#fff;border-radius:20px;padding:7px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+  .modulos button.on{background:#fff;color:var(--terracota)}
+</style><style>:root{--terracota:#2E6B5F;--claro:#D6E8E3}</style></head><body><div id="app" style="display:flex;flex-direction:column;flex:1"><div class="cuerpo"><p>Cargando…</p></div></div>
+<script>
+// Página de reservas de las clientas: ?c=<id de la hoja de Citas de la peluquería>.
+// Una pregunta por pantalla: servicio → con quién → día → hora → nombre y teléfono.
+var app=document.getElementById('app');
+function guardado(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+// La app instalada se abre sin ?c=: se recuerda la peluquería de la última reserva.
+var ID=new URLSearchParams(location.search).get('c')||guardado('res_id')||'';
+if(ID)guardado('res_id',ID);
+// Android/Chrome avisa de que se puede instalar: se guarda para el botón "Guardar en mi móvil".
+var aviso_instalar=null;
+window.addEventListener&&window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();aviso_instalar=e;});
+var API='https://script.google.com/macros/s/'+ID+'/exec';
+var datos=null, sel={}, ocupado=false;
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function euros(n){return Number(n).toLocaleString('es-ES',{minimumFractionDigits:0,maximumFractionDigits:2})+' €';}
+function duracion(m){return m<60?m+' min':(Math.floor(m/60)+' h'+(m%60?' '+(m%60)+' min':''));}
+function cab(paso){return '<div class="cab">'+(paso?'<span class="quien">Paso '+paso+' de 5</span>':'')+'<small>Reservar cita</small><b>'+esc(datos?datos.negocio:'')+'</b></div>';}
+function pintar(paso,html){app.innerHTML=cab(paso)+'<div class="cuerpo">'+html+'</div>';window.scrollTo(0,0);}
+function nuevoToken(){try{return crypto.randomUUID();}catch(e){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16);});}}
+function servidor(cuerpo,bien,mal){
+  if(ocupado)return; ocupado=true; app.classList.add('cargando');
+  function fallo(error){ocupado=false;app.classList.remove('cargando');
+    if(mal&&mal(String(error)))return;
+    alert('No se ha podido completar: '+error+'. Comprueba la conexión y vuelve a intentarlo.');}
+  fetch(API,{method:'POST',body:JSON.stringify(cuerpo)})
+    .then(function(r){return r.text();})
+    .then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}
+      if(!j){fallo('Google ha respondido algo raro ('+t.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,120)+')');return;}
+      if(j.ok){ocupado=false;app.classList.remove('cargando');
+        // Un fallo de la página al pintar NO es falta de conexión: se dice tal cual.
+        try{bien(j.datos);}catch(e){alert('Error de la página: '+(e&&e.message?e.message:e)+'. Recarga la página.');}}else{fallo(j.error);}})
+    .catch(function(e){fallo('sin conexión');});
+}
+function empezar(){
+  if(!ID){app.innerHTML='<div class="cuerpo"><h2>Falta el enlace de la peluquería</h2><p>Abre el enlace completo que te han pasado.</p></div>';return;}
+  servidor({accion:'reserva-datos'},function(d){
+    datos=d;document.title='Reservar · '+d.negocio;
+    // En iPhone, el nombre del icono sale de aquí: el de la peluquería.
+    var m=document.querySelector&&document.querySelector('meta[name="apple-mobile-web-app-title"]');if(m)m.setAttribute('content',d.negocio);
+    pasoServicio();});
+}
+// Citas reservadas desde este móvil (las de hoy en adelante).
+function misCitas(){
+  var l=[];try{l=JSON.parse(guardado('res_citas_'+ID)||'[]')||[];}catch(e){l=[];}
+  return l.filter(function(x){return x&&typeof x==='object'&&x.t;});
+}
+function pasoServicio(){
+  sel={token:nuevoToken()};
+  var hoy=new Date(), hoyTxt=hoy.getFullYear()+'-'+String(hoy.getMonth()+1).padStart(2,'0')+'-'+String(hoy.getDate()).padStart(2,'0');
+  var proximas=misCitas().filter(function(x){return String(x.dia||'')>=hoyTxt;});
+  var h='';
+  if(proximas.length){
+    h+='<div class="titulo">📅 Tus citas</div><div class="lista">';
+    proximas.forEach(function(x){h+='<a class="fila-prod" style="text-decoration:none;color:inherit" href="cita.html?c='+encodeURIComponent(ID)+'&t='+encodeURIComponent(x.t)+'"><span><b>'+esc(x.servicio)+'</b><small>'+esc(x.cuando)+'</small></span><span class="lado"><b class="pv">Cambiar o cancelar ›</b></span></a>';});
+    h+='</div>';
+  }
+  h+='<div class="titulo">'+(proximas.length?'¿Reservar otra?':'¿Qué te vas a hacer?')+'</div><div class="lista">';
+  datos.servicios.forEach(function(s,i){h+='<button class="fila-prod" onclick="elegirServicio('+i+')"><span><b>'+esc(s.nombre)+'</b><small>'+duracion(s.minutos)+'</small></span><span class="lado"><b class="pv">'+euros(s.precio)+'</b></span></button>';});
+  if(!datos.servicios.length)h+='<div class="vacio">Esta peluquería todavía no tiene servicios para reservar.</div>';
+  pintar(1,h+'</div>');
+}
+function elegirServicio(i){
+  sel.servicio=datos.servicios[i];
+  if(sel.servicio.quien.length===1){sel.quien=sel.servicio.quien[0];pasoDia('');return;}
+  pasoQuien();
+}
+function pasoQuien(){
+  var h='<div class="titulo">¿Con quién?</div><div class="lista"><button class="fila-prod destacado" onclick="elegirQuien(\'cualquiera\')"><span><b>Me da igual</b><small>Te damos la primera hora libre</small></span></button>';
+  sel.servicio.quien.forEach(function(e){h+='<button class="fila-prod" onclick="elegirQuien(\''+esc(e).replace(/'/g,'')+'\')"><span><b>'+esc(e)+'</b></span></button>';});
+  pintar(2,h+'</div><button class="enlace" onclick="pasoServicio()">← Atrás</button>');
+}
+function elegirQuien(q){sel.quien=q;pasoDia('');}
+function pasoDia(desde){
+  servidor({accion:'huecos',servicio:sel.servicio.nombre,quien:sel.quien,desde:desde,dias:14},function(r){
+    sel.dias=r.dias;
+    var h='<div class="titulo">¿Qué día?</div><div class="lista">', hay=false;
+    r.dias.forEach(function(d,i){
+      var n=d.horas.length;
+      if(!n){h+='<button class="fila-prod" disabled style="opacity:.45"><span><b>'+esc(d.etiqueta)+'</b><small>Completo o cerrado</small></span></button>';return;}
+      hay=true;
+      h+='<button class="fila-prod" onclick="elegirDia('+i+')"><span><b>'+esc(d.etiqueta)+'</b><small>'+(n===1?'Queda 1 hora':'Quedan '+n+' horas')+'</small></span><span class="lado">›</span></button>';
+    });
+    h+='</div>';
+    if(!hay)h+='<div class="vacio">No quedan horas en estos días.</div>';
+    if(r.hayMas&&r.dias.length)h+='<button class="ok" style="background:#fff;color:var(--tinta);border:2px solid var(--linea)" onclick="pasoDia(\''+siguienteDia(r.dias[r.dias.length-1].dia)+'\')">Ver más días →</button>';
+    h+='<button class="enlace" onclick="'+(sel.servicio.quien.length===1?'pasoServicio()':'pasoQuien()')+'">← Atrás</button>';
+    pintar(3,h);
+  });
+}
+function elegirDia(i){
+  sel.dia=sel.dias[i];
+  var boton=function(x,j){return '<button class="hora" onclick="elegirHora('+j+')">'+esc(x.h)+'</button>';};
+  var man='',tar='';
+  sel.dia.horas.forEach(function(x,j){if(x.h<'14:00')man+=boton(x,j);else tar+=boton(x,j);});
+  pintar(4,'<div class="titulo">¿A qué hora? <small style="font-weight:400;color:#7A6D60">('+esc(sel.dia.etiqueta)+')</small></div>'+
+    (man?'<div class="franja">☀️ Mañana</div><div class="horas">'+man+'</div>':'')+(tar?'<div class="franja">🌙 Tarde</div><div class="horas">'+tar+'</div>':'')+
+    '<button class="enlace" onclick="pasoDia(\'\')">← Otro día</button>');
+}
+function elegirHora(j){
+  sel.hora=sel.dia.horas[j];
+  var s=sel.servicio;
+  pintar(5,'<div class="elegido" style="display:block;line-height:1.6"><b>'+esc(s.nombre)+'</b> · '+euros(s.precio)+'<br>'+esc(sel.dia.etiqueta)+' a las <b>'+esc(sel.hora.h)+'</b><br>Con '+esc(sel.quien==='cualquiera'?sel.hora.e+' (la primera libre)':sel.hora.e)+'</div>'+
+    '<input class="campo" id="nombre" placeholder="Tu nombre" autocomplete="name" value="'+esc(guardado('res_nombre')||'')+'">'+
+    '<input class="campo" id="tel" placeholder="Tu teléfono" inputmode="tel" autocomplete="tel" value="'+esc(guardado('res_tel')||'')+'">'+
+    '<input class="campo" id="correo" placeholder="Tu correo (opcional, para el recordatorio)" inputmode="email" autocomplete="email" value="'+esc(guardado('res_correo')||'')+'">'+
+    '<button class="ok" id="btnReservar" onclick="reservar()">Reservar</button><button class="enlace" onclick="elegirDia(sel.dias.indexOf(sel.dia))">← Otra hora</button>');
+}
+function reservar(){
+  var nombre=document.getElementById('nombre').value.trim(), tel=document.getElementById('tel').value.trim(), correo=document.getElementById('correo').value.trim();
+  if(!nombre){alert('Escribe tu nombre.');return;}
+  if(tel.replace(/\D/g,'').length<9){alert('Escribe tu teléfono (9 cifras).');return;}
+  if(correo&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){alert('El correo no parece correcto. Si no quieres ponerlo, déjalo vacío.');return;}
+  guardado('res_nombre',nombre);guardado('res_tel',tel);if(correo)guardado('res_correo',correo);
+  var b=document.getElementById('btnReservar'); if(b){b.disabled=true;b.textContent='Reservando…';}
+  servidor({accion:'reservar',reserva:{servicio:sel.servicio.nombre,quien:sel.hora.e,dia:sel.dia.dia,h:sel.hora.h,nombre:nombre,telefono:tel,correo:correo,token:sel.token}},
+    function(r){hecho(r.cita);},
+    function(error){
+      if(b){b.disabled=false;b.textContent='Reservar';}
+      if(error.indexOf('OCUPADA')!==-1){alert('Vaya, alguien acaba de coger esa hora. Elige otra.');pasoDia(sel.dia.dia);return true;}
+      return false;});
+}
+function hecho(c){
+  var enlace='cita.html?c='+encodeURIComponent(ID)+'&t='+encodeURIComponent(c.token);
+  // Se recuerda en este móvil para poder cambiarla o cancelarla luego (aunque no haya dejado correo).
+  var mis=misCitas().filter(function(x){return x.t!==c.token;});
+  mis.push({t:c.token,dia:c.dia,cuando:c.cuando,servicio:c.servicio});
+  guardado('res_citas_'+ID,JSON.stringify(mis.slice(-10)));
+  app.innerHTML='<div class="hecho"><div class="grande-emoji">✅</div><h2>¡Cita reservada!</h2><p><b>'+esc(c.servicio)+'</b><br>'+esc(c.cuando)+'<br>con '+esc(c.con)+'</p>'+
+    '<a class="ok" style="display:block;text-decoration:none;max-width:320px" href="'+enlaceCalendario(c)+'" target="_blank" rel="noopener">📅 Añadir a mi calendario</a>'+
+    '<button class="ok" style="background:#fff;color:var(--tinta);border:2px solid var(--linea);max-width:320px" onclick="guardarEnMovil()">📲 Guardar en mi móvil</button>'+
+    '<a class="enlace" href="'+enlace+'">Cambiar o cancelar la cita</a>'+
+    '<p style="font-size:14px;color:#7A6D60">Guarda esta página: con ese enlace puedes cambiarla o cancelarla.</p></div>';
+}
+function enlaceCalendario(c){
+  var ini=c.dia.replace(/-/g,'')+'T'+c.h.replace(':','')+'00';
+  var finMin=Number(c.h.slice(0,2))*60+Number(c.h.slice(3))+(sel.servicio?sel.servicio.minutos:30);
+  var fin=c.dia.replace(/-/g,'')+'T'+String(Math.floor(finMin/60)).padStart(2,'0')+String(finMin%60).padStart(2,'0')+'00';
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(c.servicio+' · '+datos.negocio)+'&dates='+ini+'/'+fin+'&details='+encodeURIComponent('Con '+c.con);
+}
+function guardarEnMovil(){
+  if(aviso_instalar){aviso_instalar.prompt();aviso_instalar=null;return;}
+  var iphone=/iphone|ipad|ipod/i.test(navigator.userAgent||'');
+  alert(iphone
+    ?'Para tener '+(datos?datos.negocio:'la peluquería')+' en tu iPhone:\n\n1. Pulsa el botón Compartir (el cuadrado con la flecha hacia arriba, abajo).\n2. Elige "Añadir a pantalla de inicio".'
+    :'Para tenerla en tu móvil: abre el menú del navegador (los tres puntos ⋮) y pulsa "Instalar aplicación" o "Añadir a pantalla de inicio".');
+}
+function siguienteDia(d){var f=new Date(d+'T12:00:00');f.setDate(f.getDate()+1);return f.toISOString().slice(0,10);}
+empezar();
+</script></body></html>

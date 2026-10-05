@@ -1,0 +1,22 @@
+{
+  "id": "reservar-cita",
+  "name": "Reservar cita",
+  "short_name": "Reservar",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFDF8",
+  "theme_color": "#2E6B5F",
+  "icons": [
+    {
+      "src": "icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

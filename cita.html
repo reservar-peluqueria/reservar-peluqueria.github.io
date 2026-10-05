@@ -1,0 +1,166 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Tu cita</title>
+<meta name="theme-color" content="#2E6B5F">
+<link rel="icon" href="icono-192.png">
+<style>
+  :root{--papel:#FFFDF8;--tinta:#2B241E;--gris:#7A6D60;--linea:#E7DDCD;--terracota:#B8522F;--claro:#F6E3DA;--verde:#188038;--verde-claro:#E6F4EA;--rojo:#C5221F;--rojo-claro:#FCE8E6}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--papel);color:var(--tinta);font-family:Arial,Helvetica,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+  /* Netlify pone abajo un aviso "Powered by Netlify" (plan gratis): se deja hueco
+     para que no tape los botones de abajo (pasó con "Cerrar la caja", 02/10). */
+  #app{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  button{font:inherit;color:inherit;cursor:pointer;border:0}
+  .cab{background:var(--terracota);color:#fff;padding:14px 16px}
+  .cab small{opacity:.85;display:block;font-size:12px}.cab b{font-size:19px}
+  .quien{float:right;background:rgba(255,255,255,.22);border-radius:20px;padding:6px 12px;font-size:14px;color:#fff}
+  .cuerpo{flex:1;padding:14px;overflow-y:auto}
+  .titulo{font-weight:700;font-size:18px;margin:4px 2px 12px}
+  .rejilla{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grande{background:#fff;border:2px solid var(--linea);border-radius:16px;padding:16px 8px;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center}
+  .grande:active,.pago:active{transform:scale(.97)}
+  .grande .n{font-weight:700;font-size:16px}.grande .p{color:var(--terracota);font-weight:700;font-size:19px}
+  .pagos{display:grid;gap:12px}
+  .pago{background:#fff;border:2px solid var(--linea);border-radius:16px;padding:20px;font-size:22px;font-weight:700;display:flex;align-items:center;gap:14px}
+  .pago span{font-size:30px}
+  .elegido{background:var(--claro);border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:17px}
+  .cambiar{background:#fff;border-radius:10px;padding:8px 10px;font-size:14px;margin-left:8px}
+  .enlace{background:none;color:var(--gris);text-decoration:underline;padding:12px;font-size:15px;display:block;margin:6px auto 0}
+  .pie{border-top:1px solid var(--linea);padding:10px 14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pie button{background:#F0E8DC;border-radius:12px;padding:14px 6px;font-size:15px;font-weight:700}
+  .lista{display:grid;gap:10px}
+  .lista button{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:18px;font-size:20px;font-weight:700}
+  .pantalla-num{font-size:40px;font-weight:700;text-align:center;margin:8px 0 16px;min-height:52px}
+  .teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .teclado button{background:#fff;border:2px solid var(--linea);border-radius:12px;padding:16px;font-size:24px;font-weight:700}
+  .ok{width:100%;margin-top:12px;background:var(--terracota);color:#fff;border-radius:14px;padding:18px;font-size:20px;font-weight:700}
+  .ok:disabled{opacity:.5}
+  .hecho{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;background:var(--verde-claro)}
+  .hecho .grande-emoji{font-size:64px}.hecho h2{margin:0;color:var(--verde);font-size:28px}.hecho p{margin:0;font-size:19px}
+  .hecho.mal{background:var(--rojo-claro)}.hecho.mal h2{color:var(--rojo)}
+  .deshacer{margin-top:18px;background:#fff;border:3px solid var(--rojo);color:var(--rojo);border-radius:16px;padding:16px 28px;font-size:21px;font-weight:700}
+  .cuenta{color:var(--gris);font-size:14px}
+  .aviso{background:var(--rojo-claro);color:var(--rojo);border-radius:12px;padding:12px;margin:10px 0;font-weight:700;text-align:center}
+  .cargando{opacity:.5;pointer-events:none}
+  .pie.tres{grid-template-columns:1fr 1fr 1fr}
+  .destacado{border-color:var(--terracota)!important;background:var(--claro)!important}
+  .buscador{width:100%;padding:12px 14px;font-size:16px;border:2px solid var(--linea);border-radius:12px;margin-bottom:10px;font-family:inherit}
+  .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+  .chip{background:#fff;border:2px solid var(--linea);border-radius:20px;padding:7px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+  .chip.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .lista-prod{display:grid;gap:8px}
+  .fila-prod{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%}
+  .fila-prod small{display:block;color:var(--gris);font-size:12px}.fila-prod b{font-size:16px}
+  .fila-prod .lado{text-align:right;white-space:nowrap}.pv{color:var(--terracota)}
+  .contador{display:flex;align-items:center;justify-content:center;gap:28px;margin:18px 0}
+  .contador button{width:64px;height:64px;border-radius:50%;border:2px solid var(--linea);background:#fff;font-size:30px;font-weight:700}
+  .contador b{font-size:44px;min-width:50px;text-align:center}
+  .aviso-stock{background:#FBEFD9;color:#A86B12;border-radius:10px;padding:10px 14px;font-weight:700;margin-top:6px}
+  .aviso-stock.rojo{background:var(--rojo-claro);color:var(--rojo)}
+  .dia-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+  .dia-nav button{background:#fff;border:2px solid var(--linea);border-radius:10px;padding:8px 14px;font-weight:700;font-size:18px}
+  .dia-nav b{font-size:16px;text-align:center}
+  .filtro{display:flex;gap:6px;margin-bottom:10px}
+  .filtro button{background:#fff;border:2px solid var(--linea);border-radius:20px;padding:7px 14px;font-weight:700;font-size:14px}
+  .filtro button.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+  .cita{background:#fff;border:2px solid var(--linea);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .cita .arriba{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .cita .h{font-size:20px;font-weight:700}.cita .h small{font-size:13px;color:var(--gris);font-weight:400}
+  .cita .cl{font-weight:700;font-size:16px;margin-top:2px}.cita .mas{color:var(--gris);font-size:14px}
+  .cita.hecha{opacity:.8}
+  .sello{font-size:12px;font-weight:700;border-radius:20px;padding:4px 9px;white-space:nowrap}
+  .s-conf{background:var(--verde-claro);color:var(--verde)}.s-pend{background:#FBEFD9;color:#A86B12}
+  .s-vino{background:var(--verde);color:#fff}.s-falta{background:var(--rojo);color:#fff}
+  .acciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .acciones button{border-radius:10px;padding:12px 6px;font-weight:700;font-size:15px}
+  .b-vino{background:var(--verde-claro);color:var(--verde);border:2px solid #B7DFC2}
+  .b-falta{background:var(--rojo-claro);color:var(--rojo);border:2px solid #F3C0BB}
+  .llamar{display:inline-block;margin-top:8px;color:#A86B12;font-weight:700;font-size:14px;text-decoration:none}
+  .vacio{text-align:center;color:var(--gris);padding:30px 10px}
+  .horas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .hora{background:#fff;border:2px solid var(--linea);border-radius:12px;padding:14px 4px;font-weight:700;font-size:17px}
+  .franja{color:var(--gris);font-weight:700;margin:14px 2px 8px;font-size:14px}
+  .campo{width:100%;padding:14px;font-size:17px;border:2px solid var(--linea);border-radius:12px;margin-bottom:10px;font-family:inherit}
+  .modulos{display:flex;gap:6px;margin-top:10px;overflow-x:auto}
+  .modulos button{background:rgba(255,255,255,.18);color:#fff;border-radius:20px;padding:7px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+  .modulos button.on{background:#fff;color:var(--terracota)}
+</style><style>:root{--terracota:#2E6B5F;--claro:#D6E8E3}</style></head><body><div id="app" style="display:flex;flex-direction:column;flex:1"><div class="cuerpo"><p>Cargando…</p></div></div>
+<script>
+// "Mi cita": ?c=<id de la hoja>&t=<código de la cita>[&accion=confirmar|cancelar]
+// Para confirmar, cambiar la hora o cancelar. Los botones del correo traen
+// "accion", pero siempre hay que pulsar un botón aquí: así no se confirma ni se
+// cancela sola si un antivirus abre el enlace del correo.
+var app=document.getElementById('app');
+var q=new URLSearchParams(location.search);
+var ID=q.get('c')||'', TOKEN=q.get('t')||'', ACCION=q.get('accion')||'';
+var API='https://script.google.com/macros/s/'+ID+'/exec';
+var cita=null, ocupado=false, cambio={};
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function pintar(html){app.innerHTML='<div class="cab"><small>Tu cita</small><b>'+(cita?esc(cita.servicio):'Cita')+'</b></div><div class="cuerpo">'+html+'</div>';window.scrollTo(0,0);}
+function final(emoji,titulo,texto,mal){app.innerHTML='<div class="hecho'+(mal?' mal':'')+'"><div class="grande-emoji">'+emoji+'</div><h2>'+titulo+'</h2><p>'+texto+'</p></div>';}
+function servidor(cuerpo,bien,mal){
+  if(ocupado)return; ocupado=true; app.classList.add('cargando');
+  cuerpo.token=TOKEN;
+  function fallo(error){ocupado=false;app.classList.remove('cargando');if(mal&&mal(String(error)))return;alert('No se ha podido completar: '+error);}
+  fetch(API,{method:'POST',body:JSON.stringify(cuerpo)})
+    .then(function(r){return r.text();})
+    .then(function(t){var j=null;try{j=JSON.parse(t);}catch(e){}
+      if(!j){fallo('Google ha respondido algo raro');return;}
+      if(j.ok){ocupado=false;app.classList.remove('cargando');
+        // Un fallo de la página al pintar NO es falta de conexión: se dice tal cual.
+        try{bien(j.datos);}catch(e){alert('Error de la página: '+(e&&e.message?e.message:e)+'. Recarga la página.');}}else{fallo(j.error);}})
+    .catch(function(){fallo('sin conexión');});
+}
+function empezar(){
+  if(!ID||!TOKEN){final('🤔','Falta el enlace','Abre el enlace completo del correo o de la reserva.',true);return;}
+  servidor({accion:'mi-cita'},function(d){cita=d.cita;ver();},function(e){final('🤔','No encuentro la cita',esc(e),true);return true;});
+}
+function tarjeta(){return '<div class="elegido" style="display:block;line-height:1.6"><b>'+esc(cita.servicio)+'</b> con '+esc(cita.con)+'<br>'+esc(cita.cuando)+'</div>';}
+function ver(){
+  if(cita.estado==='Cancelada'){final('↩️','Esta cita está cancelada','Si quieres otra, reserva de nuevo desde el enlace de la peluquería.',true);return;}
+  if(cita.pasada||cita.estado==='Ha venido'||cita.estado==='No ha venido'){final('🗓️','Esta cita ya ha pasado','¡Gracias!');return;}
+  if(ACCION==='cancelar'){ACCION='';preguntarCancelar();return;}
+  var confirmada=cita.confirmo==='Sí';
+  var h=tarjeta();
+  if(ACCION==='confirmar'&&!confirmada)h+='<p style="font-size:17px">¿Vienes a tu cita?</p>';
+  h+=(confirmada?'<p style="color:var(--verde);font-weight:700">🟢 Ya nos has confirmado que vienes. ¡Gracias!</p>':
+    '<button class="ok" style="background:var(--verde)" onclick="confirmar()">✅ Sí, allí estaré</button>')+
+    '<button class="ok" style="background:#fff;color:var(--tinta);border:2px solid var(--linea)" onclick="cambiarDia(\'\')">🕐 Cambiar la hora</button>'+
+    '<button class="ok" style="background:#fff;color:var(--rojo);border:2px solid var(--rojo)" onclick="preguntarCancelar()">❌ No puedo ir</button>';
+  pintar(h);
+}
+function confirmar(){servidor({accion:'confirmar'},function(d){cita=d.cita;final('🟢','¡Gracias, '+esc(cita.clienta)+'!','Te esperamos '+esc(cita.cuando.charAt(0).toLowerCase()+cita.cuando.slice(1))+'.');});}
+function preguntarCancelar(){
+  pintar(tarjeta()+'<p style="font-size:17px">¿Seguro que quieres cancelarla? Así otra clienta podrá usar tu hora.</p>'+
+    '<button class="ok" style="background:var(--rojo)" onclick="cancelar()">Sí, cancelar la cita</button>'+
+    '<button class="ok" style="background:#fff;color:var(--tinta);border:2px solid var(--linea)" onclick="cambiarDia(\'\')">Mejor cambiarla de hora</button>'+
+    '<button class="enlace" onclick="ver()">← No, la mantengo</button>');
+}
+function cancelar(){servidor({accion:'cancelar'},function(){final('↩️','Cita cancelada','Gracias por avisar. Cuando quieras, reserva otra desde el enlace de la peluquería.',true);});}
+function cambiarDia(desde){
+  servidor({accion:'huecos',servicio:cita.servicio,quien:cita.con,desde:desde,dias:14,ignorar:TOKEN},function(r){
+    cambio.dias=r.dias;
+    var h='<div class="titulo">¿Qué día te viene mejor?</div><div class="lista">', hay=false;
+    r.dias.forEach(function(d,i){if(!d.horas.length)return;hay=true;h+='<button class="fila-prod" onclick="cambiarHora('+i+')"><span><b>'+esc(d.etiqueta)+'</b><small>'+d.horas.length+' horas libres</small></span><span class="lado">›</span></button>';});
+    if(!hay)h+='<div class="vacio">No quedan horas con '+esc(cita.con)+' en estos días.</div>';
+    h+='</div>';
+    if(r.hayMas&&r.dias.length)h+='<button class="enlace" onclick="cambiarDia(\''+siguienteDia(r.dias[r.dias.length-1].dia)+'\')">Ver más días →</button>';
+    pintar(h+'<button class="enlace" onclick="ver()">← Volver</button>');
+  });
+}
+function cambiarHora(i){
+  cambio.dia=cambio.dias[i];
+  var boton=function(x){return '<button class="hora" onclick="guardarCambio(\''+x.h+'\')">'+esc(x.h)+'</button>';};
+  var man='',tar='';
+  cambio.dia.horas.forEach(function(x){if(x.h<'14:00')man+=boton(x);else tar+=boton(x);});
+  pintar('<div class="titulo">¿A qué hora? <small style="font-weight:400;color:#7A6D60">('+esc(cambio.dia.etiqueta)+')</small></div>'+
+    (man?'<div class="franja">☀️ Mañana</div><div class="horas">'+man+'</div>':'')+(tar?'<div class="franja">🌙 Tarde</div><div class="horas">'+tar+'</div>':'')+
+    '<button class="enlace" onclick="cambiarDia(\'\')">← Otro día</button>');
+}
+function guardarCambio(h){
+  servidor({accion:'cambiar',dia:cambio.dia.dia,h:h},function(d){cita=d.cita;final('✅','¡Cita cambiada!','Ahora es '+esc(cita.cuando.charAt(0).toLowerCase()+cita.cuando.slice(1))+' con '+esc(cita.con)+'.');},
+    function(e){if(e.indexOf('OCUPADA')!==-1){alert('Esa hora la acaban de coger. Elige otra.');cambiarDia(cambio.dia.dia);return true;}return false;});
+}
+function siguienteDia(d){var f=new Date(d+'T12:00:00');f.setDate(f.getDate()+1);return f.toISOString().slice(0,10);}
+empezar();
+</script></body></html>
