@@ -112,7 +112,7 @@ function servidor(cuerpo,bien,mal){
     .catch(function(){fallo('sin conexión');});
 }
 function empezar(){
-  if(!ID||!TOKEN){final('🤔','Falta el enlace','Abre el enlace completo del correo o de la reserva.',true);return;}
+  if(!ID||!TOKEN){final('🤔','Falta el enlace','Abre el enlace completo del correo, del WhatsApp o de la reserva.',true);return;}
   servidor({accion:'mi-cita'},function(d){cita=d.cita;ver();},function(e){final('🤔','No encuentro la cita',esc(e),true);return true;});
 }
 function tarjeta(){return '<div class="elegido" style="display:block;line-height:1.6"><b>'+esc(cita.servicio)+'</b> con '+esc(cita.con)+'<br>'+esc(cita.cuando)+'</div>';}
